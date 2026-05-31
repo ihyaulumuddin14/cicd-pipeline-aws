@@ -59,19 +59,19 @@ echo "[INFO] Docker Compose version: $(docker-compose --version)"
 
 # ---- Create App Deployment Directory ----
 echo "[INFO] Creating deployment directory structure..."
-mkdir -p /opt/app/web-profile
+mkdir -p /opt/app/tanstack-demo
 chown -R ubuntu:ubuntu /opt/app
 
 # ---- Create Helper Deploy Script ----
 cat > /opt/app/deploy.sh << 'DEPLOY_SCRIPT'
 #!/bin/bash
 # ===========================================
-# deploy.sh – Deploy web-profile via docker-compose
+# deploy.sh – Deploy tanstack-demo via docker-compose
 # Called by Jenkins after code push
 # ===========================================
 set -e
 
-APP_DIR="/opt/app/web-profile"
+APP_DIR="/opt/app/tanstack-demo"
 REPO_URL="https://github.com/ihyaulumuddin14/tanstack-demo.git"
 
 echo "[DEPLOY] Starting deployment – $(date)"
@@ -115,7 +115,7 @@ cat > /home/ubuntu/docker-info.txt << EOF
 ==========================================
 Public IP     : ${PUBLIC_IP}
 App URL       : http://${PUBLIC_IP}:3000
-App Dir       : /opt/app/web-profile
+App Dir       : /opt/app/tanstack-demo
 Deploy Script : /opt/app/deploy.sh
 
 Docker        : $(docker --version)
@@ -125,7 +125,7 @@ Log File      : /var/log/user-data.log
 ------------------------------------------
 Test Docker:
   docker ps
-  docker-compose -f /opt/app/web-profile/docker-compose.yml ps
+  docker-compose -f /opt/app/tanstack-demo/docker-compose.yml ps
 ==========================================
 EOF
 
