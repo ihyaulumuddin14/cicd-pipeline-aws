@@ -32,10 +32,10 @@ allowed_ssh_cidr = "0.0.0.0/0"
 github_token = "ghp_xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
 
 # Username GitHub kamu
-github_owner = "Widhi-yahya"
+github_owner = "ihyaulumuddin14"
 
 # Nama repository (tanpa owner prefix)
-github_repo = "web-profile"
+github_repo = "tanstack-demo"
 
 # ---- Project Settings ----
-project_name = "web-profile-cicd"
+project_name = "tanstack-demo-cicd"

@@ -72,7 +72,7 @@ cat > /opt/app/deploy.sh << 'DEPLOY_SCRIPT'
 set -e
 
 APP_DIR="/opt/app/web-profile"
-REPO_URL="https://github.com/Widhi-yahya/web-profile.git"
+REPO_URL="https://github.com/ihyaulumuddin14/tanstack-demo.git"
 
 echo "[DEPLOY] Starting deployment – $(date)"
 echo "[DEPLOY] Working directory: ${APP_DIR}"
@@ -114,7 +114,7 @@ cat > /home/ubuntu/docker-info.txt << EOF
   $(date)
 ==========================================
 Public IP     : ${PUBLIC_IP}
-App URL       : http://${PUBLIC_IP}
+App URL       : http://${PUBLIC_IP}:3000
 App Dir       : /opt/app/web-profile
 Deploy Script : /opt/app/deploy.sh
 

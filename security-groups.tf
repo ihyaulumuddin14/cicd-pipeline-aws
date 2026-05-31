@@ -45,7 +45,7 @@ resource "aws_security_group" "jenkins" {
 
   tags = {
     Name    = "${var.project_name}-jenkins-sg"
-    Project = "web-profile-cicd"
+    Project = "tanstack-demo-cicd"
   }
 }
 
@@ -82,7 +82,7 @@ resource "aws_security_group" "sonarqube" {
 
   tags = {
     Name    = "${var.project_name}-sonarqube-sg"
-    Project = "web-profile-cicd"
+    Project = "tanstack-demo-cicd"
   }
 }
 
@@ -146,6 +146,6 @@ resource "aws_security_group" "docker" {
 
   tags = {
     Name    = "${var.project_name}-docker-sg"
-    Project = "web-profile-cicd"
+    Project = "tanstack-demo-cicd"
   }
 }

@@ -56,7 +56,7 @@ resource "aws_instance" "jenkins" {
 
   tags = {
     Name    = "${var.project_name}-jenkins"
-    Project = "web-profile-cicd"
+    Project = "tanstack-demo-cicd"
     Role    = "jenkins"
   }
 }
@@ -84,7 +84,7 @@ resource "aws_instance" "sonarqube" {
 
   tags = {
     Name    = "${var.project_name}-sonarqube"
-    Project = "web-profile-cicd"
+    Project = "tanstack-demo-cicd"
     Role    = "sonarqube"
   }
 }
@@ -112,7 +112,7 @@ resource "aws_instance" "docker" {
 
   tags = {
     Name    = "${var.project_name}-docker"
-    Project = "web-profile-cicd"
+    Project = "tanstack-demo-cicd"
     Role    = "docker-deploy"
   }
 }

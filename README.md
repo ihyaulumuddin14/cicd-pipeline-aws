@@ -1,5 +1,5 @@
 # CI/CD Pipeline: Jenkins + SonarQube + Docker di AWS Academy
-### Project: [web-profile](https://github.com/Widhi-yahya/web-profile) | Terraform Automated Infrastructure
+### Project: [tanstack-demo](https://github.com/ihyaulumuddin14/tanstack-demo) | Terraform Automated Infrastructure
 
 ---
 
@@ -114,10 +114,10 @@ key_name         = "vockey"          # ← nama KEY PAIR di AWS (bukan nama file
                                      # Di AWS Academy: key pair = "vockey", file = "labsuser.pem"
 
 github_token     = "ghp_xxxxxxxxxxxx"  # ← token dari Step 2.3
-github_owner     = "Widhi-yahya"
-github_repo      = "web-profile"
+github_owner     = "ihyaulumuddin14"
+github_repo      = "tanstack-demo"
 
-project_name     = "web-profile-cicd"
+project_name     = "tanstack-demo-cicd"
 allowed_ssh_cidr = "0.0.0.0/0"
 ```
 
@@ -190,7 +190,7 @@ Script ini akan mencetak semua URL, SSH commands, dan status server.
 
 Saat `terraform apply` selesai, Terraform telah:
 
-✅ Membuat GitHub webhook di repository `Widhi-yahya/web-profile`
+✅ Membuat GitHub webhook di repository `ihyaulumuddin14/tanstack-demo`
 ✅ Mengatur URL webhook ke `http://<jenkins-ip>:8080/github-webhook/`
 ✅ Mengaktifkan events: `push` dan `pull_request`
 ✅ Content type: `application/json`

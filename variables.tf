@@ -45,9 +45,9 @@ variable "github_owner" {
 }
 
 variable "github_repo" {
-  description = "GitHub repository name without the owner prefix (e.g. 'web-profile')"
+  description = "GitHub repository name without the owner prefix (e.g. 'tanstack-demo')"
   type        = string
-  default     = "web-profile"
+  default     = "tanstack-demo"
 }
 
 # ---- Project Settings ----
@@ -55,5 +55,5 @@ variable "github_repo" {
 variable "project_name" {
   description = "Project name used for naming AWS resources and tags"
   type        = string
-  default     = "web-profile-cicd"
+  default     = "tanstack-demo-cicd"
 }
