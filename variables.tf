@@ -40,7 +40,7 @@ variable "github_token" {
 }
 
 variable "github_owner" {
-  description = "GitHub username or organization that owns the repository (e.g. 'Widhi-yahya')"
+  description = "GitHub username or organization that owns the repository"
   type        = string
 }
 

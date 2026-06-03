@@ -1,4 +1,5 @@
 # CI/CD Pipeline: Jenkins + SonarQube + Docker di AWS Academy
+
 ### Project: [tanstack-demo](https://github.com/ihyaulumuddin14/tanstack-demo) | Terraform Automated Infrastructure
 
 ---
@@ -46,11 +47,11 @@ Developer Push → GitHub → [Webhook otomatis] → Jenkins
                                           Web App Live (http://<docker-ip>)
 ```
 
-| Server      | Port | Fungsi                                     |
-|-------------|------|--------------------------------------------|
-| Jenkins     | 8080 | CI/CD orchestrator, build trigger          |
-| SonarQube   | 9000 | Code quality analysis                      |
-| Docker      | 80   | Production deployment via docker-compose   |
+| Server    | Port | Fungsi                                   |
+| --------- | ---- | ---------------------------------------- |
+| Jenkins   | 8080 | CI/CD orchestrator, build trigger        |
+| SonarQube | 9000 | Code quality analysis                    |
+| Docker    | 80   | Production deployment via docker-compose |
 
 **Semua infrastruktur di-provision oleh Terraform** termasuk GitHub Webhook.
 
@@ -60,17 +61,17 @@ Developer Push → GitHub → [Webhook otomatis] → Jenkins
 
 ### 2.1 Tools yang Harus Terinstall di Komputer Lokal
 
-| Tool      | Versi Minimum | Cara Install                             |
-|-----------|---------------|------------------------------------------|
-| Terraform | >= 1.3.0      | `brew install terraform` (Mac)           |
-| AWS CLI   | >= 2.0        | Sudah terkonfigurasi (aws configure)     |
-| Git       | any           | `brew install git`                       |
+| Tool      | Versi Minimum | Cara Install                         |
+| --------- | ------------- | ------------------------------------ |
+| Terraform | >= 1.3.0      | `brew install terraform` (Mac)       |
+| AWS CLI   | >= 2.0        | Sudah terkonfigurasi (aws configure) |
+| Git       | any           | `brew install git`                   |
 
 ### 2.2 File yang Harus Ada di Direktori Kerja
 
 ```
 ci-cd/
-├── *.pem          ← File key pair AWS kamu (misal: vockey.pem)
+├── *.pem          ← File key pair AWS (misal: vockey.pem)
 ├── main.tf
 ├── variables.tf
 ├── ...
@@ -130,13 +131,7 @@ terraform init
 ```
 
 Output yang diharapkan:
-```
-Initializing the backend...
-Initializing provider plugins...
-- Finding integrations/github versions matching "~> 6.0"...
-- Finding hashicorp/aws versions matching "~> 5.0"...
-✔ Terraform has been successfully initialized!
-```
+![terraform init output](picture/terraform-init.png)
 
 ### Step 4: Plan (preview)
 
@@ -144,7 +139,8 @@ Initializing provider plugins...
 terraform plan
 ```
 
-Kamu akan melihat rencana pembuatan:
+Akan menampilkan rencana pembuatan:
+
 - `3 aws_instance` (Jenkins, SonarQube, Docker)
 - `3 aws_security_group`
 - `1 github_repository_webhook`
@@ -158,9 +154,12 @@ terraform apply
 Ketik `yes` saat diminta konfirmasi.
 
 Terraform akan:
+
 1. Membuat 3 EC2 instances
 2. Membuat 3 Security Groups
 3. **Otomatis membuat GitHub Webhook** yang mengarah ke Jenkins
+
+![terraform apply](picture/terraform-apply.png)
 
 **Waktu proses**: ±3-5 menit untuk Terraform apply.
 **Waktu inisialisasi server**: ±5-10 menit setelah apply selesai.
@@ -173,6 +172,8 @@ terraform output
 
 Catat semua IP yang ditampilkan, kamu akan butuh ini.
 
+![terraform-output](picture/terraform-output.png)
+
 ### Step 7: Jalankan Post-Provision Script
 
 ```bash
@@ -181,6 +182,8 @@ chmod +x post-provision.sh
 ```
 
 Script ini akan mencetak semua URL, SSH commands, dan status server.
+
+![post-provision output](picture/post-provision.png)
 
 ---
 
@@ -200,16 +203,19 @@ Kamu **TIDAK PERLU** mengkonfigurasi webhook secara manual.
 ### 4.2 Cara Verifikasi Webhook di GitHub
 
 1. Buka browser, pergi ke:
+
    ```
-   https://github.com/Widhi-yahya/web-profile/settings/hooks
+   `https://github.com/ihyaulumuddin14/tanstack-demo/settings/hooks`
    ```
 
-2. Kamu akan melihat 1 webhook dengan URL:
+2. Akan ada 1 webhook dengan URL:
+
    ```
    http://<jenkins-ip>:8080/github-webhook/
    ```
 
 3. **Status Normal (sebelum Jenkins dikonfigurasi):**
+   ![webhook failed](picture/git-webhook%20failed.png)
    - Ada tanda ⚠️ atau ❌ – ini **NORMAL** karena Jenkins belum siap menerima webhook
    - Setelah Jenkins selesai dikonfigurasi di Section 5, webhook akan menampilkan ✅
 
@@ -248,34 +254,28 @@ terraform apply
 ssh -i labsuser.pem ubuntu@<JENKINS_IP> 'sudo cat /var/lib/jenkins/secrets/initialAdminPassword'
 ```
 
+![initial admin pass](picture/initial%20admin%20password.png)
+
 Output akan berupa string 32 karakter, contoh:
+
 ```
-a1b2c3d4e5f6789012345678901234ab
+1b2c3d4e5f6789012345678901234ab
 ```
 
 **COPY password ini!**
 
 **Step 2:** Buka browser, pergi ke:
+
 ```
 http://<JENKINS_IP>:8080
 ```
 
 **Step 3:** Tampilan akan menampilkan:
-```
-┌─────────────────────────────────────┐
-│  Unlock Jenkins                     │
-│                                     │
-│  To ensure Jenkins is securely      │
-│  set up, please enter the password  │
-│  below.                             │
-│                                     │
-│  Administrator password:            │
-│  [________________________]         │
-│                      [Continue]     │
-└─────────────────────────────────────┘
-```
+
+![unlock jenkins](picture/jenkins-unlock.png)
 
 → **Paste password** yang tadi di-copy
+
 → Klik **"Continue"**
 
 ---
@@ -284,28 +284,11 @@ http://<JENKINS_IP>:8080
 
 Setelah unlock, muncul halaman **"Customize Jenkins"**:
 
-```
-┌──────────────────────────────────────────────────────────┐
-│  Customize Jenkins                                        │
-│                                                           │
-│  [Install suggested plugins]  [Select plugins to install] │
-└──────────────────────────────────────────────────────────┘
-```
+![install manage plugin](picture/jenkins-install-manage-plugin.png)
 
 → Klik **"Install suggested plugins"** (tombol kiri)
 
-Jenkins akan menampilkan progress instalasi plugin:
-```
-✔ Folders
-✔ OWASP Markup Formatter
-✔ Build Timeout
-✔ Credentials Binding
-⏳ Timestamper
-⏳ Workspace Cleanup
-... (dan seterusnya)
-```
-
-**Tunggu hingga semua plugin selesai** (±3-5 menit).
+→**Tunggu hingga semua plugin selesai** (±3-5 menit).
 
 > **Catatan:** Plugin seperti SonarQube Scanner, Publish Over SSH, dan GitHub sudah
 > diinstall via user_data (jenkins-plugin-manager). Plugin di step ini adalah
@@ -317,39 +300,21 @@ Jenkins akan menampilkan progress instalasi plugin:
 
 Setelah plugin terinstall, muncul form **"Create First Admin User"**:
 
-```
-┌─────────────────────────────────────┐
-│  Create First Admin User            │
-│                                     │
-│  Username:    [admin____________]   │
-│  Password:    [****************]   │
-│  Confirm:     [****************]   │
-│  Full name:   [Widhi Yahya_______]  │
-│  Email:       [you@example.com__]   │
-│                        [Save & Continue] │
-└─────────────────────────────────────┘
-```
+![Create admin user](picture/jenkins-create%20admin%20user.png)
 
 → Isi semua field
+
 → Klik **"Save and Continue"**
 
 **Halaman berikutnya: "Instance Configuration"**
 
-```
-┌─────────────────────────────────────┐
-│  Instance Configuration             │
-│                                     │
-│  Jenkins URL:                       │
-│  [http://<IP>:8080/______________]  │
-│                    [Save and Finish] │
-└─────────────────────────────────────┘
-```
+![instance configuration](picture/jenkins-instance%20configuration.png)
 
 → Biarkan URL default (sudah terisi otomatis dengan IP Jenkins)
-→ Klik **"Save and Finish"**
-→ Klik **"Start using Jenkins"**
 
-Kamu sekarang masuk ke Jenkins Dashboard! 🎉
+→ Klik **"Save and Finish"**
+
+→ Klik **"Start using Jenkins"**
 
 ---
 
@@ -358,6 +323,7 @@ Kamu sekarang masuk ke Jenkins Dashboard! 🎉
 > Lakukan ini di tab browser baru.
 
 **Step 1:** Buka SonarQube di:
+
 ```
 http://<SONARQUBE_IP>:9000
 ```
@@ -366,25 +332,22 @@ http://<SONARQUBE_IP>:9000
 > SonarQube butuh waktu untuk start karena menginisialisasi database.
 
 **Step 2:** Login dengan kredensial default:
+
 ```
 Username: admin
 Password: admin
 ```
 
+![login](picture/sonarqube-login%20defaultpassword.png)
+
 **Step 3:** Muncul popup "Update your password":
-```
-┌─────────────────────────────────────┐
-│  Update your password               │
-│                                     │
-│  Old password:  [admin___________]  │
-│  New password:  [****************]  │
-│  Confirm:       [****************]  │
-│                           [Update]  │
-└─────────────────────────────────────┘
-```
+
+![update password](picture/sonarqube-update%20password.png)
 
 → Isi `admin` di "Old password"
-→ Isi password baru yang kuat (catat!)
+
+→ Isi password baru yang kuat
+
 → Klik **"Update"**
 
 ---
@@ -394,68 +357,53 @@ Password: admin
 **Step 1:** Di SonarQube Dashboard, klik **"Create a local project"**
 
 **Step 2:** Isi form Project:
-```
-┌─────────────────────────────────────────┐
-│  Create a project                        │
-│                                          │
-│  Project display name: [web-profile___]  │
-│  Project key:          [web-profile___]  │
-│  Main branch name:     [main__________]  │
-│                              [Next >]    │
-└─────────────────────────────────────────┘
-```
 
-→ Project display name: `web-profile`
-→ Project key: `web-profile`
-→ Main branch: `main` (atau `master` sesuai repo kamu)
+![Form create local project](picture/sonarqube-create-project.png)
+
+→ Project display name: `tanstack-demo`
+
+→ Project key: `tanstack-demo`
+
+→ Main branch: `main`
+
 → Klik **"Next"**
 
 **Step 3:** Pilih baseline:
-```
-How do you want to define your "New Code"?
-○ Use the global setting
-● Previous version
-```
+
+![Setup project (choose baseline)](picture/sonarqube-pilih-baseline.png)
+
 → Pilih **"Previous version"**
+
 → Klik **"Create project"**
 
 **Step 4:** Pilih analysis method – **"With Jenkins"**
-```
-┌────────────────────────────────┐
-│  How do you want to analyze    │
-│  your repository?              │
-│                                │
-│  ○ Jenkins                     │
-│  ○ GitHub Actions              │
-│  ○ Other CI                    │
-│  ○ Locally                     │
-└────────────────────────────────┘
-```
+
+![Analysis Method](picture/sonarqube-analysis-method.png)
+
 → Klik **"Jenkins"**
 
 > Jika tidak muncul pilihan ini, skip ke Step 5.
 
 **Step 5:** Generate Token untuk Jenkins:
 
-1. Di SonarQube, klik avatar/nama kamu di pojok kanan atas
+1. Di SonarQube, klik avatar/nama di pojok kanan atas
 2. Klik **"My Account"**
 3. Klik tab **"Security"**
 4. Di section "Generate Tokens":
-   ```
-   Name:        [jenkins-token____________]
-   Type:        [User Token      ▼]
-   Expires in:  [No expiration   ▼]
-                              [Generate]
-   ```
+
    → Name: `jenkins-token`
+
    → Type: `User Token`
+
    → Klik **"Generate"**
 
 5. Token akan muncul **SEKALI SAJA**:
    ```
    squ_xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
    ```
-   → **COPY TOKEN INI SEKARANG!** Simpan di notepad.
+   → **COPY TOKEN INI** Simpan di notepad.
+
+![generate token](picture/sonarqube-generate-token.png)
 
 ---
 
@@ -468,37 +416,25 @@ How do you want to define your "New Code"?
 **Step 2:** Klik **"Manage Credentials"**
 
 **Step 3:** Klik pada **(global)** di bawah "Stores scoped to Jenkins":
-```
-┌──────────────────────────────────────┐
-│  Credentials                          │
-│  ┌─────────────────────────────────┐  │
-│  │ Store: Jenkins          Scopes  │  │
-│  │ Domain: (global) ──────→ [klik] │  │
-│  └─────────────────────────────────┘  │
-└──────────────────────────────────────┘
-```
 
 **Step 4:** Klik **"Add Credentials"** (tombol di kiri)
 
 **Step 5:** Isi form credential:
-```
-┌────────────────────────────────────────────┐
-│  New credentials                            │
-│                                             │
-│  Kind:        [Secret text          ▼]      │
-│  Scope:       [Global (Jenkins, ...)▼]      │
-│  Secret:      [squ_xxxxx... (paste token)]  │
-│  ID:          [sonarqube-token___________]  │
-│  Description: [SonarQube Auth Token______]  │
-│                                   [Create]  │
-└────────────────────────────────────────────┘
-```
+
+![secret text](picture/jenkins-sonarqube-token1.png)
 
 → **Kind**: pilih `Secret text`
+
+![form](picture/jenkins-sonarqube-token2.png)
+
 → **Scope**: `Global (Jenkins, nodes, items, all child items, etc)`
+
 → **Secret**: paste token SonarQube dari Step 5.5
+
 → **ID**: `sonarqube-token` (PERSIS seperti ini, akan direferensikan di pipeline)
+
 → **Description**: `SonarQube Auth Token`
+
 → Klik **"Create"**
 
 ---
@@ -510,38 +446,23 @@ How do you want to define your "New Code"?
 **Step 2:** Klik **"Configure System"**
 
 **Step 3:** Scroll ke bawah hingga menemukan section **"SonarQube servers"**:
-```
-┌─────────────────────────────────────────────────────┐
-│  SonarQube servers                                   │
-│                                                      │
-│  ☐ Environment variables                             │
-│  ✅ Enable injection of SonarQube server              │
-│     configuration as build environment variables    │
-│                                                      │
-│  [Add SonarQube]                                     │
-└─────────────────────────────────────────────────────┘
-```
 
 → **Centang** "Enable injection of SonarQube server configuration..."
 → Klik **"Add SonarQube"**
 
 **Step 4:** Isi detail SonarQube server:
-```
-┌──────────────────────────────────────────────────────┐
-│  SonarQube installations                              │
-│                                                       │
-│  Name:       [SonarQube_____________________________] │
-│  Server URL: [http://<SONARQUBE_IP>:9000____________] │
-│  Server auth token: [sonarqube-token          ▼]      │
-└──────────────────────────────────────────────────────┘
-```
+
+![configure sonarQube server](picture/jenkins-sonarqube-server.png)
 
 → **Name**: `SonarQube` (PERSIS seperti ini, case-sensitive)
+
 → **Server URL**: `http://<SONARQUBE_IP>:9000`
-  → Ganti `<SONARQUBE_IP>` dengan IP dari `terraform output sonarqube_public_ip`
+
+→ Ganti `<SONARQUBE_IP>` dengan IP dari `terraform output sonarqube_public_ip`
+
 → **Server authentication token**: pilih `sonarqube-token` dari dropdown
 
-**Step 5:** Klik **"Save"** (di bagian bawah halaman)
+**Step 5:** Klik **"Save"**
 
 ---
 
@@ -550,33 +471,21 @@ How do you want to define your "New Code"?
 **Step 1:** Klik **"Manage Jenkins"**
 
 **Step 2:** Klik **"Global Tool Configuration"**
+
 > Alternatif di Jenkins versi baru: **"Tools"**
 
 **Step 3:** Scroll ke section **"SonarQube Scanner"**:
-```
-┌──────────────────────────────────────────────────────┐
-│  SonarQube Scanner                                    │
-│                                                       │
-│  [Add SonarQube Scanner]                              │
-└──────────────────────────────────────────────────────┘
-```
 
 → Klik **"Add SonarQube Scanner"**
 
 **Step 4:** Isi konfigurasi:
-```
-┌──────────────────────────────────────────────────────┐
-│  SonarQube Scanner                                    │
-│                                                       │
-│  Name:    [SonarQube-Scanner____________________]     │
-│  ✅ Install automatically                             │
-│  Install from Maven Central                          │
-│  Version: [SonarQube Scanner 5.0.1.3006      ▼]      │
-└──────────────────────────────────────────────────────┘
-```
 
-→ **Name**: `SonarQube-Scanner` (PERSIS seperti ini)
+![SonarQube Scanner](picture/jenkins-sonarqube-scanner.png)
+
+→ **Name**: `SonarQube-Scanner`
+
 → **Centang** "Install automatically"
+
 → **Version**: pilih versi terbaru yang tersedia
 
 **Step 5:** Klik **"Save"**
@@ -588,12 +497,14 @@ How do you want to define your "New Code"?
 Jenkins perlu SSH key untuk koneksi ke Docker server.
 
 **Step 1:** Buka file `.pem` kamu dan copy isinya:
+
 ```bash
 # Di terminal lokal
 cat labsuser.pem
 ```
 
 Copy SEMUA isi file termasuk header dan footer:
+
 ```
 -----BEGIN RSA PRIVATE KEY-----
 MIIEpAIBAAKCAQEA...
@@ -606,32 +517,24 @@ MIIEpAIBAAKCAQEA...
 
 **Step 3:** Klik **(global)** → **"Add Credentials"**
 
+![add SSH credential](picture/jenkins-add%20SSH%20credentials.png)
+
 **Step 4:** Isi form:
-```
-┌────────────────────────────────────────────────────────┐
-│  New credentials                                        │
-│                                                         │
-│  Kind:        [SSH Username with private key    ▼]      │
-│  Scope:       [Global (Jenkins, ...)            ▼]      │
-│  ID:          [docker-server-key__________________]     │
-│  Description: [Docker Server SSH Key______________]     │
-│  Username:    [ubuntu_____________________________]     │
-│  Private Key: ● Enter directly                          │
-│               [Add]                                     │
-│               [-----BEGIN RSA PRIVATE KEY-----         │
-│                MIIEpAIBAAKCAQEA...                      │
-│                (paste SEMUA isi file .pem)              │
-│                -----END RSA PRIVATE KEY-----]           │
-│                                          [Create]       │
-└────────────────────────────────────────────────────────┘
-```
+
+![add SSH username](picture/jenkins-add%20SSH%20username.png)
 
 → **Kind**: `SSH Username with private key`
+
 → **Scope**: `Global`
+
 → **ID**: `docker-server-key`
+
 → **Description**: `Docker Server SSH Key`
+
 → **Username**: `ubuntu`
+
 → **Private Key**: klik **"Enter directly"** → klik **"Add"** → paste SEMUA isi file `.pem`
+
 → Klik **"Create"**
 
 ---
@@ -645,26 +548,8 @@ MIIEpAIBAAKCAQEA...
 **Step 2:** Scroll ke section **"Publish over SSH"**
 
 **Step 3:** Klik **"Add"** di section "SSH Servers":
-```
-┌──────────────────────────────────────────────────────────┐
-│  Publish over SSH                                          │
-│                                                            │
-│  Key: [-----BEGIN RSA PRIVATE KEY-----                    │
-│         (paste isi file .pem)                             │
-│         -----END RSA PRIVATE KEY-----]                    │
-│                                                            │
-│  SSH Servers:                                              │
-│  ┌──────────────────────────────────────────────────────┐ │
-│  │ Name:             [docker-server_________________]   │ │
-│  │ Hostname:         [<DOCKER_IP>___________________]   │ │
-│  │ Username:         [ubuntu_______________________]   │ │
-│  │ Remote Directory: [/opt/app/web-profile__________]   │ │
-│  │ [Advanced...]                                        │ │
-│  └──────────────────────────────────────────────────────┘ │
-│                                                            │
-│  [Test Configuration]                    [Save]            │
-└──────────────────────────────────────────────────────────┘
-```
+
+![confgure ssh server](picture/jenkins-config%20ssh%20server.png)
 
 Isi field:
 
@@ -673,32 +558,29 @@ Isi field:
 
 **Bagian SSH Servers:**
 → **Name**: `docker-server`
+
 → **Hostname**: IP dari `terraform output docker_public_ip`
-  Contoh: `54.123.456.789`
+
+Contoh: `54.123.456.789`
+
 → **Username**: `ubuntu`
-→ **Remote Directory**: `/opt/app/web-profile`
+
+→ **Remote Directory**: `/opt/app/tanstack-demo`
 
 **Step 4:** Klik **"Advanced..."** untuk expand opsi tambahan:
-```
-┌──────────────────────────────────────────────────┐
-│  Advanced                                         │
-│                                                   │
-│  ☐ Use password authentication, or use a         │
-│    different key                                  │
-│  Port: [22]                                       │
-│  Timeout (ms): [300000]                           │
-└──────────────────────────────────────────────────┘
-```
+
 → Biarkan default (port 22, jangan centang "Use password authentication")
 
 **Step 5:** Klik **"Test Configuration"**
 
 Hasil yang diharapkan:
+
 ```
 Success
 ```
 
 Jika gagal:
+
 - Pastikan Docker server sudah berjalan (tunggu jika baru deploy)
 - Pastikan security group Docker mengizinkan port 22 dari Jenkins IP
 - Cek bahwa private key yang di-paste sudah benar
@@ -712,21 +594,10 @@ Jika gagal:
 **Step 1:** Di Jenkins Dashboard, klik **"New Item"** (menu kiri)
 
 **Step 2:** Isi nama project:
-```
-┌────────────────────────────────────────────────────┐
-│  Enter an item name                                 │
-│                                                     │
-│  [web-profile-pipeline_________________________]    │
-│                                                     │
-│  ● Freestyle project                                │
-│  ○ Pipeline                                         │
-│  ○ Multi-configuration project                      │
-│  ○ ...                                              │
-│                                           [OK]      │
-└────────────────────────────────────────────────────┘
-```
 
-→ Name: `web-profile-pipeline`
+![create project](picture/jenkins-freestyle-project.png)
+
+→ Name: `tanstack-demo-pipeline`
 → Pilih: **"Freestyle project"**
 → Klik **"OK"**
 
@@ -740,26 +611,18 @@ Kamu masuk ke halaman konfigurasi project. Ada beberapa tab di atas:
 **Step 1:** Klik tab **"Source Code Management"**
 
 **Step 2:** Pilih **"Git"**:
-```
-┌────────────────────────────────────────────────────────────┐
-│  Source Code Management                                     │
-│                                                             │
-│  ● Git                                                      │
-│                                                             │
-│  Repositories:                                              │
-│  Repository URL: [https://github.com/Widhi-yahya/web-profile] │
-│  Credentials:    [- none - ▼] (untuk public repo, biarkan) │
-│                                                             │
-│  Branches to build:                                         │
-│  Branch Specifier: [*/main_________________]                │
-└────────────────────────────────────────────────────────────┘
-```
 
-→ **Repository URL**: `https://github.com/Widhi-yahya/web-profile`
+![source code management](picture/jenkins-source%20code%20management.png)
+
+→ **Repository URL**: `https://github.com/ihyaulumuddin14/tanstack-demo`
+
 → **Credentials**: `- none -` (karena repo public)
-  → Jika private, klik "Add" dan buat credential dengan GitHub token
+
+→ Jika private, klik "Add" dan buat credential dengan GitHub token
+
 → **Branch Specifier**: `*/main`
-  → Atau `*/master` jika branch utama namanya master
+
+→ Atau `*/master` jika branch utama namanya master
 
 ---
 
@@ -768,18 +631,8 @@ Kamu masuk ke halaman konfigurasi project. Ada beberapa tab di atas:
 **Step 1:** Klik tab **"Build Triggers"**
 
 **Step 2:** Centang opsi berikut:
-```
-┌────────────────────────────────────────────────────────┐
-│  Build Triggers                                         │
-│                                                         │
-│  ☐ Trigger builds remotely (e.g., from scripts)        │
-│  ☐ Build after other projects are built                │
-│  ☐ Build periodically                                   │
-│  ☐ GitHub hook trigger for GITScm polling              │
-│  ✅ GitHub hook trigger for GITScm polling              │
-│  ☐ Poll SCM                                             │
-└────────────────────────────────────────────────────────┘
-```
+
+![build trigger](picture/jenkins-build%20triggers.png)
 
 → **Centang**: `GitHub hook trigger for GITScm polling`
 
@@ -793,23 +646,10 @@ Kamu masuk ke halaman konfigurasi project. Ada beberapa tab di atas:
 **Step 1:** Klik tab **"Build Environment"**
 
 **Step 2:** Centang:
-```
-┌────────────────────────────────────────────────────────────┐
-│  Build Environment                                          │
-│                                                             │
-│  ✅ Prepare SonarQube Scanner environment                   │
-│     Which SonarQube installation? [SonarQube ▼]            │
-│                                                             │
-│  ☐ Delete workspace before build starts                    │
-│  ✅ Add timestamps to the Console Output                    │
-└────────────────────────────────────────────────────────────┘
-```
 
-→ **Centang**: `Prepare SonarQube Scanner environment`
-→ Pilih installation: `SonarQube` (sesuai nama yang dibuat di 5.7)
 → **Centang** (opsional): `Add timestamps to the Console Output`
 
----
+## ![environment checklist](picture/jenkins-environment.png)
 
 ### 5.15 Build Steps – SonarQube Analysis
 
@@ -818,130 +658,107 @@ Kamu masuk ke halaman konfigurasi project. Ada beberapa tab di atas:
 **Step 2:** Klik **"Add build step"** → pilih **"Execute SonarQube Scanner"**
 
 **Step 3:** Isi konfigurasi:
-```
-┌────────────────────────────────────────────────────────────┐
-│  Execute SonarQube Scanner                                  │
-│                                                             │
-│  Task to run: [scan_______________________] (biarkan)       │
-│  JDK: [Inherit from job ▼]                                  │
-│                                                             │
-│  Analysis properties:                                       │
-│  ┌──────────────────────────────────────────────────────┐  │
-│  │ sonar.projectKey=web-profile                         │  │
-│  │ sonar.projectName=web-profile                        │  │
-│  │ sonar.projectVersion=1.0                             │  │
-│  │ sonar.sources=.                                      │  │
-│  │ sonar.exclusions=**/node_modules/**,**/*.test.js     │  │
-│  └──────────────────────────────────────────────────────┘  │
-└────────────────────────────────────────────────────────────┘
-```
 
 → **Task to run**: biarkan kosong (default: `scan`)
 → **Analysis properties** – copy-paste teks ini PERSIS:
 
 ```properties
-sonar.projectKey=web-profile
-sonar.projectName=web-profile
+sonar.projectKey=tanstack-demo
+sonar.projectName=tanstack-demo
 sonar.projectVersion=1.0
 sonar.sources=.
 sonar.exclusions=**/node_modules/**,**/*.test.js,**/vendor/**
 sonar.sourceEncoding=UTF-8
 ```
 
+![configure sonarQube scanner](picture/jenkins-sonarqube-scanner-config.png)
+
 ---
 
 ### 5.16 Build Steps – Deploy ke Docker Server
+
+Siapkan file env terlebih dahulu pada docker server
+
+```
+   MONGODB_URI=***
+
+   BETTER_AUTH_SECRET=***
+
+   AUTH_URL=http://<DOCKER_IP>:3000
+   NEXT_PUBLIC_AUTH_URL=http://<DOCKER_IP>:3000
+```
 
 **Step 1:** Masih di tab "Build Steps", klik **"Add build step"** lagi
 
 **Step 2:** Pilih **"Send files or execute commands over SSH"**
 
 **Step 3:** Isi konfigurasi:
-```
-┌────────────────────────────────────────────────────────────┐
-│  Send files or execute commands over SSH                    │
-│                                                             │
-│  SSH Server Name: [docker-server ▼]                         │
-│                                                             │
-│  Transfers:                                                 │
-│  ┌──────────────────────────────────────────────────────┐  │
-│  │ Source files:      (KOSONGKAN)                       │  │
-│  │ Remove prefix:     (KOSONGKAN)                       │  │
-│  │ Remote directory:  (KOSONGKAN)                       │  │
-│  │ Exec command: (lihat di bawah)                       │  │
-│  └──────────────────────────────────────────────────────┘  │
-└────────────────────────────────────────────────────────────┘
-```
 
 Isi field:
 → **SSH Server Name**: pilih `docker-server` dari dropdown
+
 → **Source files**: **KOSONGKAN** (gunakan git pull, tidak perlu transfer file)
+
 → **Remove prefix**: KOSONGKAN
+
 → **Remote directory**: KOSONGKAN
+
 → **Exec command**: paste command berikut:
 
 ```bash
-# Clone jika belum ada, pull jika sudah ada
-if [ -d "/opt/app/web-profile/.git" ]; then
-    cd /opt/app/web-profile
-    git fetch origin
-    git reset --hard origin/main 2>/dev/null || git reset --hard origin/master
-else
-    git clone https://github.com/Widhi-yahya/web-profile.git /opt/app/web-profile
-    cd /opt/app/web-profile
-fi
+   # Clone jika belum ada, pull jika sudah ada
+   #!/bin/bash
+   set -e
 
-# Fix port mapping agar sesuai security group (80, bukan 8080)
-sed -i 's/8080:80/80:80/g' /opt/app/web-profile/docker-compose.yml
+   APP_DIR="/opt/app/tanstack-demo"
+   REPO_URL="https://github.com/ihyaulumuddin14/tanstack-demo.git"
 
-# Deploy dengan Docker Compose
-cd /opt/app/web-profile
-docker-compose down --remove-orphans || true
-docker-compose up -d --build
-docker-compose ps
-echo "Deployment complete at $(date)"
+   echo "================================="
+   echo "Deploy started: $(date)"
+   echo "================================="
+
+   # Clone pertama kali atau update repo
+   if [ -d "$APP_DIR/.git" ]; then
+      echo "[INFO] Updating repository..."
+
+      cd "$APP_DIR"
+
+      git fetch origin
+      git reset --hard origin/main
+
+   else
+      echo "[INFO] Cloning repository..."
+
+      git clone "$REPO_URL" "$APP_DIR"
+
+      cd "$APP_DIR"
+   fi
+
+   echo "[INFO] Docker Compose validation..."
+   docker-compose config
+
+   echo "[INFO] Stopping old containers..."
+   docker-compose down --remove-orphans || true
+
+   echo "[INFO] Building and starting containers..."
+   docker-compose up -d --build
+
+   echo "[INFO] Running containers:"
+   docker-compose ps
+
+   echo "================================="
+   echo "Deploy completed: $(date)"
+   echo "================================="
 ```
-
-> **Kenapa `sed -i`?** File `docker-compose.yml` di repo menggunakan port `8080:80`.
-> Security group Docker hanya membuka port `80`, sehingga port perlu di-fix setiap deploy.
 
 **Step 4:** Klik **"Advanced..."** di bagian Transfer Sets:
-```
-┌──────────────────────────────────────────────────┐
-│  Advanced                                         │
-│                                                   │
-│  ✅ Exec in pty                                   │
-│  Exec timeout (ms): [120000]                      │
-└──────────────────────────────────────────────────┘
-```
+
 → **Centang**: `Exec in pty`
+
 → **Timeout**: `120000` (2 menit, cukup untuk docker build)
 
----
-
-### 5.17 Post-build Actions
-
-**Step 1:** Klik tab **"Post-build Actions"**
-
-**Step 2:** (Opsional) **"Archive the artifacts"** → **SKIP / HAPUS step ini**
-
-> ⚠️ **JANGAN tambahkan step "Archive the artifacts"** untuk project web-profile.
-> Project ini tidak menghasilkan file `.log` sehingga build akan selalu FAILED.
->
-> Jika step ini sudah terlanjur ada → klik tombol **"X"** / **Delete** pada step
-> tersebut untuk menghapusnya, lalu **Save**.
->
-> Jika tetap ingin dipertahankan, **wajib** isi:
-> - Files to archive: `**/*.log`
-> - Klik **"Advanced..."** → centang **"Do not fail build if archiving returns nothing"**
-
-**Step 3:** (Opsional) Klik **"Add post-build action"** → **"Publish Quality Gate Result"**
-- Plugin SonarQube Quality Gate sudah terinstall
-- Ini akan membuat build **FAILED** jika code quality di bawah threshold
-
-**Step 4:** Klik **"Save"** (tombol di bagian bawah halaman)
-
-Konfigurasi project selesai! 🎉
+![docker server ssh configure](picture/jenkins-docker%20server%20config.png)
+![docker server ssh configure](picture/jenkins-docker%20server%20config2.png)
 
 ---
 
@@ -949,46 +766,44 @@ Konfigurasi project selesai! 🎉
 
 ### Test 1: Manual Build
 
-1. Di Jenkins, klik project **"web-profile-pipeline"**
+1. Di Jenkins, klik project **"tanstack-demo-pipeline"**
 2. Klik **"Build Now"** di menu kiri
 3. Kamu akan melihat build baru muncul di "Build History" (#1)
 4. Klik pada build tersebut → klik **"Console Output"**
 5. Monitor progress:
-   ```
-   Started by user admin
-   [Git] ... Cloning repository https://github.com/Widhi-yahya/web-profile.git
-   ...
-   SONAR_HOME = /var/lib/jenkins/tools/hudson.plugins.sonar.SonarRunnerInstallation/SonarQube-Scanner
-   INFO: Scanner configuration file: ...
-   INFO: Project configuration file: ...
-   INFO: Analyzing...
-   INFO: Analysis report uploaded in XXms
-   INFO: ANALYSIS SUCCESSFUL, you can find the results at: http://<SONAR_IP>:9000/dashboard?id=web-profile
-   ...
-   [SSH] Executing command...
-   [DEPLOY] Starting deployment...
-   [DEPLOY] Deployment complete at ...
-   Finished: SUCCESS
-   ```
 
-6. Buka SonarQube: `http://<SONAR_IP>:9000` → project **"web-profile"** → lihat hasil analisis
+   ![manual build output](picture/jenkins-manudal%20build1.png)
+   ![manual build output](picture/jenkins-manudal%20build2.png)
+
+6. Buka SonarQube: `http://<SONAR_IP>:9000` → project **"tanstack-demo"** → lihat hasil analisis
+
+   ![SonarQube analysis result](picture/sonarqube-analysis-result.png)
+   ![SonarQube analysis result](picture/sonarqube-analysis-result2.png)
 
 7. Buka app: `http://<DOCKER_IP>` → website harus tampil
 
+   ![app](picture/web-tampil.png)
+
 ### Test 2: Trigger via GitHub Push
 
-1. Edit file apapun di repository web-profile di GitHub
+1. Edit file apapun di repository tanstack-demo di GitHub
    (misalnya edit README.md)
 2. Commit dan push ke branch main
 3. Dalam 1-2 menit, Jenkins akan otomatis mulai build baru
 4. Cek di Jenkins Dashboard → **"Build History"** → build baru muncul
 
+![new](picture/new1.png)
+![new](picture/new2.png)
+![build history](picture/build-history.png)
+
 ### Test 3: Verifikasi Webhook Delivery
 
-1. Buka GitHub: `https://github.com/Widhi-yahya/web-profile/settings/hooks`
+1. Buka GitHub: `https://github.com/ihyaulumuddin14/tanstack-demo/settings/hooks`
 2. Klik webhook
 3. Scroll ke **"Recent Deliveries"**
 4. Kamu akan melihat delivery dengan status `200 OK` ✅
+
+![webhook check](picture/webhook-delivery.png)
 
 ---
 
@@ -1104,32 +919,32 @@ terraform apply
 
 ### ✅ OTOMATIS (Terraform)
 
-| Resource | Keterangan |
-|----------|------------|
-| EC2 Jenkins | Install Java, Jenkins, plugins via user_data |
-| EC2 SonarQube | Install PostgreSQL, SonarQube, config sebagai service |
-| EC2 Docker | Install Docker CE, Docker Compose, buat direktori app |
-| Security Groups | Jenkins (22,8080,50000), SonarQube (22,9000), Docker (22,80,443,3000) |
+| Resource           | Keterangan                                                               |
+| ------------------ | ------------------------------------------------------------------------ |
+| EC2 Jenkins        | Install Java, Jenkins, plugins via user_data                             |
+| EC2 SonarQube      | Install PostgreSQL, SonarQube, config sebagai service                    |
+| EC2 Docker         | Install Docker CE, Docker Compose, buat direktori app                    |
+| Security Groups    | Jenkins (22,8080,50000), SonarQube (22,9000), Docker (22,80,443,3000)    |
 | **GitHub Webhook** | **Dibuat via `integrations/github` provider, langsung point ke Jenkins** |
-| Resource Tags | Semua resource diberi tag `Project = web-profile-cicd` |
-| AMI Selection | Otomatis pilih Ubuntu 22.04 LTS terbaru |
-| Outputs | Semua URL, IP, SSH commands tampil otomatis |
+| Resource Tags      | Semua resource diberi tag `Project = tanstack-demo-cicd`                 |
+| AMI Selection      | Otomatis pilih Ubuntu 22.04 LTS terbaru                                  |
+| Outputs            | Semua URL, IP, SSH commands tampil otomatis                              |
 
 ### ✋ MANUAL (Jenkins Web UI)
 
-| Konfigurasi | Di Mana | Alasan Manual |
-|-------------|---------|---------------|
-| Login Jenkins + Setup Wizard | Jenkins UI | Butuh interaksi user |
-| Ganti password SonarQube | SonarQube UI | Keamanan |
-| Buat SonarQube project + token | SonarQube UI | Token bersifat dinamis |
-| Tambah credential SonarQube token | Jenkins → Credentials | Token tidak bisa di-Terraform |
+| Konfigurasi                           | Di Mana                    | Alasan Manual                       |
+| ------------------------------------- | -------------------------- | ----------------------------------- |
+| Login Jenkins + Setup Wizard          | Jenkins UI                 | Butuh interaksi user                |
+| Ganti password SonarQube              | SonarQube UI               | Keamanan                            |
+| Buat SonarQube project + token        | SonarQube UI               | Token bersifat dinamis              |
+| Tambah credential SonarQube token     | Jenkins → Credentials      | Token tidak bisa di-Terraform       |
 | Configure SonarQube Server di Jenkins | Jenkins → Configure System | Butuh token dari langkah sebelumnya |
-| Configure Publish Over SSH | Jenkins → Configure System | Butuh private key |
-| Create Freestyle Project | Jenkins → New Item | Kompleks via Terraform |
-| Source Code Management | Jenkins project config | Spesifik project |
-| Build Triggers (webhook) | Jenkins project config | Harus aktif setelah plugin ready |
-| Build Steps (SonarQube Scanner) | Jenkins project config | Konfigurasi analisis |
-| Build Steps (SSH Deploy) | Jenkins project config | Konfigurasi deployment |
+| Configure Publish Over SSH            | Jenkins → Configure System | Butuh private key                   |
+| Create Freestyle Project              | Jenkins → New Item         | Kompleks via Terraform              |
+| Source Code Management                | Jenkins project config     | Spesifik project                    |
+| Build Triggers (webhook)              | Jenkins project config     | Harus aktif setelah plugin ready    |
+| Build Steps (SonarQube Scanner)       | Jenkins project config     | Konfigurasi analisis                |
+| Build Steps (SSH Deploy)              | Jenkins project config     | Konfigurasi deployment              |
 
 ---
 
@@ -1148,9 +963,10 @@ terraform destroy
 Ketik `yes` untuk konfirmasi.
 
 Terraform akan menghapus:
+
 - 3 EC2 instances (Jenkins, SonarQube, Docker)
 - 3 Security Groups
-- 1 GitHub Webhook (dari repository web-profile)
+- 1 GitHub Webhook (dari repository tanstack-demo)
 
 ---
 
@@ -1164,7 +980,7 @@ ci-cd/
 ├── providers.tf               # AWS + GitHub provider config
 ├── security-groups.tf         # Security groups untuk semua server
 ├── terraform.tfvars.example   # Template konfigurasi (copy → .tfvars)
-├── terraform.tfvars           # Konfigurasi aktual (JANGAN commit ke git!)
+├── terraform.tfvars           # Konfigurasi aktual (tidak di commit)
 ├── user-data-jenkins.sh       # Bootstrap Jenkins server
 ├── user-data-sonarqube.sh     # Bootstrap SonarQube server
 ├── user-data-docker.sh        # Bootstrap Docker server
@@ -1174,4 +990,4 @@ ci-cd/
 
 ---
 
-*Dibuat dengan Terraform + AWS Academy | Aplikasi: [web-profile](https://github.com/Widhi-yahya/web-profile)*
+_Dibuat dengan Terraform + AWS Academy | Aplikasi: [tanstack-demo](https://github.com/ihyaulumuddin14/tanstack-demo.git)_
